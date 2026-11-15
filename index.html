@@ -323,7 +323,7 @@ function dibujar(categorias){
         ? '<img class="foto" alt="" data-pid="' + esc(p.id) + '">'
         : '<div class="foto"></div>';
       return '<tr data-fila="1" data-costo="' + esc(p.costo) + '"' +
-             ' data-codigo="' + esc(p.codigo) + '" data-nombre="' + esc(p.nombre) + '">' +
+             ' data-cat="' + esc(cat) + '" data-codigo="' + esc(p.codigo) + '" data-nombre="' + esc(p.nombre) + '">' +
                '<td class="c-pedir"><input type="number" class="pedir" min="0" step="1" inputmode="numeric" aria-label="Cantidad a pedir"></td>' +
                '<td>' + foto + '</td>' +
                '<td class="c-cod">' + esc(p.codigo) + '</td>' +
@@ -426,7 +426,7 @@ function leerFila(tr){
   } else {
     costo  = parseFloat(tr.dataset.costo) || 0;
     codigo = tr.dataset.codigo || "";
-    nombre = tr.dataset.nombre || "";
+    nombre = (tr.dataset.cat === "Cintas" ? "Cinta " : "") + (tr.dataset.nombre || "");
   }
   return { cant: cant, costo: costo, codigo: codigo, nombre: nombre };
 }
