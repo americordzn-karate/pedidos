@@ -1,1 +1,523 @@
-ddfdfg
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pedidos | Senshi-Kan</title>
+<style>
+  :root{
+    --negro:#111111;
+    --rojo:#b3202a;
+    --fondo:#f4f3f1;
+    --borde:#dcdad6;
+    --texto:#1c1c1c;
+    --suave:#6b6b6b;
+    --resalte:#fbeeee;
+  }
+  *{ box-sizing:border-box; }
+  [hidden]{ display:none !important; }
+  body{
+    margin:0;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--fondo);
+    color:var(--texto);
+    font-size:15px;
+  }
+  header{
+    background:var(--negro);
+    color:#fff;
+    padding:18px 20px;
+    border-bottom:4px solid var(--rojo);
+  }
+  header h1{
+    margin:0;
+    font-size:1.2rem;
+    font-weight:600;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+  }
+  header small{
+    display:block;
+    margin-top:3px;
+    color:#b5b5b5;
+    letter-spacing:.06em;
+  }
+  main{ max-width:1000px; margin:0 auto; padding:20px 14px 60px; }
+
+  /* Acceso */
+  .tarjeta{
+    background:#fff;
+    border:1px solid var(--borde);
+    border-radius:10px;
+    padding:22px;
+  }
+  #login{ max-width:380px; margin:40px auto; text-align:center; }
+  #login h2{ margin:0 0 6px; font-size:1.1rem; }
+  #login p{ margin:0 0 16px; color:var(--suave); }
+  #login input{
+    width:100%;
+    padding:12px;
+    font-size:1.1rem;
+    text-align:center;
+    border:1px solid var(--borde);
+    border-radius:8px;
+    margin-bottom:12px;
+  }
+  #loginMsg{ min-height:1.3em; margin-top:10px; color:var(--rojo); font-size:.9rem; }
+
+  /* Botones */
+  button{
+    font:inherit;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    padding:11px 18px;
+    background:var(--negro);
+    color:#fff;
+    font-weight:600;
+    letter-spacing:.03em;
+    transition:background .15s;
+  }
+  button:hover{ background:var(--rojo); }
+  button:disabled{ opacity:.5; cursor:default; }
+  button.secundario{
+    background:#fff;
+    color:var(--negro);
+    border:1px solid var(--negro);
+  }
+  button.secundario:hover{ background:var(--negro); color:#fff; }
+  button.quitar{
+    padding:6px 10px;
+    background:transparent;
+    color:var(--suave);
+    border:1px solid var(--borde);
+  }
+  button.quitar:hover{ background:var(--rojo); color:#fff; border-color:var(--rojo); }
+
+  /* Secciones y tablas */
+  section{ margin-bottom:26px; }
+  section h2{
+    margin:0 0 8px;
+    font-size:.95rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    padding-left:10px;
+    border-left:4px solid var(--rojo);
+  }
+  .envoltura{
+    overflow-x:auto;
+    background:#fff;
+    border:1px solid var(--borde);
+    border-radius:10px;
+  }
+  table{ width:100%; border-collapse:collapse; min-width:640px; }
+  th{
+    text-align:left;
+    font-size:.72rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--suave);
+    padding:10px 10px;
+    border-bottom:1px solid var(--borde);
+    background:#faf9f7;
+    white-space:nowrap;
+  }
+  td{
+    padding:8px 10px;
+    border-bottom:1px solid #eeece8;
+    vertical-align:middle;
+  }
+  tr:last-child td{ border-bottom:none; }
+  tr.con-pedido td{ background:var(--resalte); }
+  .num{ text-align:right; white-space:nowrap; }
+  th.num{ text-align:right; }
+  .cero{ color:var(--rojo); font-weight:600; }
+  .c-cod{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .c-pedir{ width:84px; }
+  input[type=number], input[type=text]{
+    width:100%;
+    padding:8px;
+    font:inherit;
+    border:1px solid var(--borde);
+    border-radius:6px;
+    background:#fff;
+  }
+  input.pedir{ width:72px; text-align:center; font-weight:600; }
+  input:focus{ outline:2px solid var(--rojo); outline-offset:0; border-color:var(--rojo); }
+  .foto{
+    display:block;
+    width:52px;
+    height:52px;
+    object-fit:cover;
+    border-radius:6px;
+    background:#e7e5e1;
+  }
+  .barra-manual{ margin-top:10px; }
+
+  /* Total */
+  .resumen{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    margin-top:10px;
+  }
+  .gran-total span{
+    display:block;
+    font-size:.75rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--suave);
+  }
+  .gran-total strong{ font-size:1.8rem; }
+
+  /* Lista generada */
+  #resultado{ margin-top:22px; }
+  #resultado table{ min-width:0; }
+  .aviso{ color:var(--suave); margin:0; }
+  .acciones-copiar{ margin-top:12px; display:flex; align-items:center; gap:12px; }
+  #copiadoMsg{ color:#1f7a3a; font-weight:600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pedidos</h1>
+  <small>Academia de Karate Senshi-Kan</small>
+</header>
+
+<main>
+
+  <!-- ACCESO -->
+  <div id="login" class="tarjeta">
+    <h2>Acceso restringido</h2>
+    <p>Ingrese su ID para continuar.</p>
+    <input type="password" id="idAcceso" inputmode="numeric" autocomplete="off" placeholder="ID">
+    <button type="button" id="btnEntrar">Entrar</button>
+    <div id="loginMsg"></div>
+  </div>
+
+  <!-- APLICACIÓN -->
+  <div id="app" hidden>
+
+    <div id="categorias"></div>
+
+    <!-- Productos nuevos (manuales) -->
+    <section>
+      <h2>Productos nuevos (fuera de inventario)</h2>
+      <div class="envoltura">
+        <table>
+          <thead>
+            <tr>
+              <th>Pedir</th>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Existencia</th>
+              <th>Costo</th>
+              <th class="num">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoManual"></tbody>
+        </table>
+      </div>
+      <div class="barra-manual">
+        <button type="button" class="secundario" id="btnNuevo">+ Nuevo producto</button>
+      </div>
+    </section>
+
+    <!-- Gran total y lista -->
+    <div class="tarjeta">
+      <div class="resumen">
+        <div class="gran-total">
+          <span>Gran Total</span>
+          <strong id="granTotal">$0.00</strong>
+        </div>
+        <button type="button" id="btnGenerar">Generar lista de pedido</button>
+      </div>
+
+      <div id="resultado" hidden>
+        <div id="listaTabla"></div>
+        <div class="acciones-copiar" id="zonaCopiar" hidden>
+          <button type="button" id="btnCopiar">Copiar</button>
+          <span id="copiadoMsg"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN: pegue aquí la URL de su aplicación web
+   (la que termina en /exec), entre las comillas.
+   ============================================================ */
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwX5w8iiwkJVbGtpz-5f20U9jue2MC0vouE3blkHXo9CIMqg9bvCZrAYE8WKxH4gXGWzg/exec";
+
+const CATEGORIAS = ["Uniformes", "Equipo", "Cintas", "Playeras"];
+const fmt = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
+
+let idAcceso = "";
+let listaTexto = "";
+
+const $ = (id) => document.getElementById(id);
+
+function esc(t){
+  return String(t === null || t === undefined ? "" : t).replace(/[&<>"']/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+  });
+}
+
+/* ---------------- ACCESO ---------------- */
+async function entrar(){
+  const id = $("idAcceso").value.trim();
+  const msg = $("loginMsg");
+  const btn = $("btnEntrar");
+
+  if(id === ""){ msg.textContent = "Ingrese su ID."; return; }
+  if(URL_SCRIPT.indexOf("PEGAR_AQUI") !== -1){
+    msg.textContent = "Falta configurar la URL del script en la página.";
+    return;
+  }
+
+  btn.disabled = true;
+  msg.style.color = "var(--suave)";
+  msg.textContent = "Verificando…";
+
+  try{
+    const r = await fetch(URL_SCRIPT + "?accion=listaPedidos&id=" + encodeURIComponent(id));
+    const j = await r.json();
+    if(!j.success){
+      msg.style.color = "var(--rojo)";
+      msg.textContent = j.error || "No se pudo cargar el listado.";
+      btn.disabled = false;
+      return;
+    }
+    idAcceso = id;
+    $("login").hidden = true;
+    $("app").hidden = false;
+    dibujar(j.categorias || {});
+    agregarManual();
+    recalcular();
+  }catch(e){
+    msg.style.color = "var(--rojo)";
+    msg.textContent = "No se pudo conectar. Intente de nuevo.";
+    btn.disabled = false;
+  }
+}
+
+/* ---------------- LISTADO POR CATEGORÍAS ---------------- */
+function dibujar(categorias){
+  const cont = $("categorias");
+  cont.innerHTML = "";
+
+  CATEGORIAS.forEach(function(cat){
+    const lista = categorias[cat] || [];
+    if(lista.length === 0) return;
+
+    const filas = lista.map(function(p){
+      const foto = p.tieneFoto
+        ? '<img class="foto" alt="" data-pid="' + esc(p.id) + '">'
+        : '<div class="foto"></div>';
+      return '<tr data-fila="1" data-costo="' + esc(p.costo) + '"' +
+             ' data-codigo="' + esc(p.codigo) + '" data-nombre="' + esc(p.nombre) + '">' +
+               '<td class="c-pedir"><input type="number" class="pedir" min="0" step="1" inputmode="numeric" aria-label="Cantidad a pedir"></td>' +
+               '<td>' + foto + '</td>' +
+               '<td class="c-cod">' + esc(p.codigo) + '</td>' +
+               '<td>' + esc(p.nombre) + '</td>' +
+               '<td class="num ' + (p.existencia <= 0 ? 'cero' : '') + '">' + esc(p.existencia) + '</td>' +
+               '<td class="num">' + fmt.format(p.costo) + '</td>' +
+               '<td class="num total">' + fmt.format(0) + '</td>' +
+             '</tr>';
+    }).join("");
+
+    const sec = document.createElement("section");
+    sec.innerHTML =
+      '<h2>' + esc(cat) + '</h2>' +
+      '<div class="envoltura"><table>' +
+        '<thead><tr>' +
+          '<th>Pedir</th><th>Foto</th><th>Código</th><th>Producto</th>' +
+          '<th class="num">Existencia</th><th class="num">Costo</th><th class="num">Total</th>' +
+        '</tr></thead>' +
+        '<tbody>' + filas + '</tbody>' +
+      '</table></div>';
+    cont.appendChild(sec);
+  });
+
+  if(cont.children.length === 0){
+    cont.innerHTML = '<div class="tarjeta"><p class="aviso">No hay productos con Código Nexus en el inventario.</p></div>';
+  }
+
+  activarFotos();
+}
+
+/* ---------------- FOTOS (carga diferida, máximo 3 a la vez) ---------------- */
+const colaFotos = [];
+let fotosActivas = 0;
+const MAX_FOTOS = 3;
+
+function procesarCola(){
+  while(fotosActivas < MAX_FOTOS && colaFotos.length > 0){
+    const img = colaFotos.shift();
+    fotosActivas++;
+    cargarFoto(img).then(function(){
+      fotosActivas--;
+      procesarCola();
+    });
+  }
+}
+
+async function cargarFoto(img){
+  try{
+    const url = URL_SCRIPT + "?accion=fotoPedido&id=" + encodeURIComponent(idAcceso) +
+                "&pid=" + encodeURIComponent(img.dataset.pid);
+    const r = await fetch(url);
+    const j = await r.json();
+    if(j.success && j.foto) img.src = j.foto;
+  }catch(e){ /* se deja el recuadro vacío */ }
+}
+
+function activarFotos(){
+  const imgs = document.querySelectorAll("img.foto[data-pid]");
+  if(!("IntersectionObserver" in window)){
+    imgs.forEach(function(img){ colaFotos.push(img); });
+    procesarCola();
+    return;
+  }
+  const obs = new IntersectionObserver(function(entradas){
+    entradas.forEach(function(en){
+      if(en.isIntersecting){
+        obs.unobserve(en.target);
+        colaFotos.push(en.target);
+        procesarCola();
+      }
+    });
+  }, { rootMargin: "200px" });
+  imgs.forEach(function(img){ obs.observe(img); });
+}
+
+/* ---------------- PRODUCTOS MANUALES ---------------- */
+function agregarManual(){
+  const tr = document.createElement("tr");
+  tr.dataset.fila = "1";
+  tr.dataset.manual = "1";
+  tr.innerHTML =
+    '<td class="c-pedir"><input type="number" class="pedir" min="0" step="1" inputmode="numeric" aria-label="Cantidad a pedir"></td>' +
+    '<td><input type="text" class="m-cod" placeholder="Código"></td>' +
+    '<td><input type="text" class="m-nom" placeholder="Producto"></td>' +
+    '<td><input type="number" class="m-exi" min="0" step="1" inputmode="numeric" placeholder="0"></td>' +
+    '<td><input type="number" class="m-cos" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></td>' +
+    '<td class="num total">' + fmt.format(0) + '</td>' +
+    '<td><button type="button" class="quitar" title="Quitar registro">✕</button></td>';
+  $("cuerpoManual").appendChild(tr);
+}
+
+/* ---------------- CÁLCULOS ---------------- */
+function leerFila(tr){
+  const cant = Math.max(0, parseFloat(tr.querySelector(".pedir").value) || 0);
+  let costo, codigo, nombre;
+  if(tr.dataset.manual){
+    costo  = Math.max(0, parseFloat(tr.querySelector(".m-cos").value) || 0);
+    codigo = tr.querySelector(".m-cod").value.trim();
+    nombre = tr.querySelector(".m-nom").value.trim();
+  } else {
+    costo  = parseFloat(tr.dataset.costo) || 0;
+    codigo = tr.dataset.codigo || "";
+    nombre = tr.dataset.nombre || "";
+  }
+  return { cant: cant, costo: costo, codigo: codigo, nombre: nombre };
+}
+
+function recalcular(){
+  let gran = 0;
+  document.querySelectorAll("tr[data-fila]").forEach(function(tr){
+    const f = leerFila(tr);
+    const t = Math.round(f.cant * f.costo * 100) / 100;
+    gran += t;
+    tr.querySelector(".total").textContent = fmt.format(t);
+    tr.classList.toggle("con-pedido", f.cant > 0);
+  });
+  $("granTotal").textContent = fmt.format(Math.round(gran * 100) / 100);
+}
+
+/* ---------------- LISTA DE PEDIDO ---------------- */
+function generarLista(){
+  const filas = [];
+  document.querySelectorAll("tr[data-fila]").forEach(function(tr){
+    const f = leerFila(tr);
+    if(f.cant > 0) filas.push(f);
+  });
+
+  const cont = $("resultado");
+  cont.hidden = false;
+
+  if(filas.length === 0){
+    listaTexto = "";
+    $("listaTabla").innerHTML = '<p class="aviso">No hay productos con cantidad en la columna Pedir.</p>';
+    $("zonaCopiar").hidden = true;
+    return;
+  }
+
+  let html = '<div class="envoltura"><table><thead><tr>' +
+             '<th>Cantidad</th><th>Código</th><th>Producto</th></tr></thead><tbody>';
+  let texto = "Cantidad\tCódigo\tProducto";
+
+  filas.forEach(function(f){
+    html += '<tr><td>' + esc(f.cant) + '</td><td class="c-cod">' + esc(f.codigo) +
+            '</td><td>' + esc(f.nombre) + '</td></tr>';
+    texto += "\n" + f.cant + "\t" + f.codigo + "\t" + f.nombre;
+  });
+  html += '</tbody></table></div>';
+
+  listaTexto = texto;
+  $("listaTabla").innerHTML = html;
+  $("zonaCopiar").hidden = false;
+  $("copiadoMsg").textContent = "";
+}
+
+async function copiar(){
+  if(listaTexto === "") return;
+  let ok = false;
+  try{
+    await navigator.clipboard.writeText(listaTexto);
+    ok = true;
+  }catch(e){
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = listaTexto;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+    }catch(e2){ ok = false; }
+  }
+  $("copiadoMsg").style.color = ok ? "#1f7a3a" : "var(--rojo)";
+  $("copiadoMsg").textContent = ok ? "Lista copiada ✓" : "No se pudo copiar. Seleccione la lista y cópiela manualmente.";
+}
+
+/* ---------------- EVENTOS ---------------- */
+$("btnEntrar").addEventListener("click", entrar);
+$("idAcceso").addEventListener("keydown", function(e){ if(e.key === "Enter") entrar(); });
+$("btnNuevo").addEventListener("click", agregarManual);
+$("btnGenerar").addEventListener("click", generarLista);
+$("btnCopiar").addEventListener("click", copiar);
+
+document.addEventListener("input", function(e){
+  if(e.target.closest && e.target.closest("tr[data-fila]")) recalcular();
+});
+
+$("cuerpoManual").addEventListener("click", function(e){
+  const btn = e.target.closest("button.quitar");
+  if(!btn) return;
+  btn.closest("tr").remove();
+  if($("cuerpoManual").children.length === 0) agregarManual();
+  recalcular();
+});
+</script>
+</body>
+</html>
