@@ -463,16 +463,16 @@ function generarLista(){
 
   let html = '<div class="envoltura"><table><thead><tr>' +
              '<th>Cantidad</th><th>Código</th><th>Producto</th></tr></thead><tbody>';
-  let texto = "Cantidad\tCódigo\tProducto";
+  const lineas = [];
 
   filas.forEach(function(f){
     html += '<tr><td>' + esc(f.cant) + '</td><td class="c-cod">' + esc(f.codigo) +
             '</td><td>' + esc(f.nombre) + '</td></tr>';
-    texto += "\n" + f.cant + "\t" + f.codigo + "\t" + f.nombre;
+    lineas.push(f.cant + " " + f.codigo + " " + f.nombre);
   });
   html += '</tbody></table></div>';
 
-  listaTexto = texto;
+  listaTexto = lineas.join("\n");
   $("listaTabla").innerHTML = html;
   $("zonaCopiar").hidden = false;
   $("copiadoMsg").textContent = "";
